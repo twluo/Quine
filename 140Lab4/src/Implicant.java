@@ -5,7 +5,7 @@ import java.util.List;
 /*
  * Stores implicants in the form where 
  */
-public class Implicant implements{
+public class Implicant {
 	
 	private long myMSB;
 	private long myLSB;

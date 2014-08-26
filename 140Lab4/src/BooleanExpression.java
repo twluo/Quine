@@ -17,6 +17,10 @@ public class BooleanExpression {
 	private List<Implicant> implicantList;
 	private List<Implicant> dontcareList;
 	private List<Long> mintermsNeededToCover;
+	private static long tempMSB;
+	private static long tempLSB;
+	private static int bitCountMSB;
+	private static int bitCountLSB;
 	private int myNumVars;
 	public static final long maxVal = -1;
 	public static final String alphabet = "abcdefghijklmnopqrstuvwxyz";
@@ -49,9 +53,36 @@ public class BooleanExpression {
 		return implicantList;
 	}
 	
+	public boolean differBySingleVariable(Implicant imp1,  Implicant imp2) {
+		tempMSB = imp1.getMSB() ^ imp2.getMSB();
+		tempLSB = imp1.getLSB() ^ imp2.getMSB();
+		bitCountMSB = Long.bitCount(tempMSB);
+		bitCountLSB = Long.bitCount(tempLSB);
+		return (bitCountMSB == 1 && bitCountLSB == 1 && tempMSB == tempLSB);	
+	}
+	
 	public void doTabulationMethod()
 	{
-		//TODO: Your code goes here
+		ArrayList<ArrayList<ArrayList<Implicant>>> tabulationList = new ArrayList<ArrayList<ArrayList<Implicant>>>(myNumVars);
+		ArrayList<ArrayList<Implicant>> tempImplicantList = new ArrayList<ArrayList<Implicant>>(myNumVars);
+		boolean completed = true;
+		boolean prime = false;
+		int difference = Long.SIZE - myNumVars;
+		int bitCount;
+		for (int i = 0; i < implicantList.size(); i++) {
+			bitCount = Long.bitCount(implicantList.get(i).getMSB());
+			bitCount = bitCount - difference;
+			tempImplicantList.get(bitCount).add(implicantList.get(i));
+		}
+		while(true) {
+			for (int i = 0; i < tabulationList.size(); i++ ) {
+				completed = true;
+				for (int j = 0; j < tabulationList.get(i).size();i++) {
+					System.out.println("Size is " + tabulationList.get(i).size() + "for " + j + "0s");
+				}
+			}
+		}
+		
 	}
 	
 	public void doQuineMcCluskey()
