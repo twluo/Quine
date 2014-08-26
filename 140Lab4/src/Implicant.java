@@ -13,6 +13,17 @@ public class Implicant {
 	private List<Long> minterms;
 	private List<Long> dontcares;
 
+	public void printList() {
+		for(int i=0; i<minterms.size(); i++) {
+			System.out.print(Long.toString(minterms.get(i)) + ", ");
+		}
+		System.out.println("");
+	}
+	
+	public void printSB() {
+		System.out.println("MSB is " + myMSB + " LSB is " + myLSB);
+	}
+
 	public long getMSB()
 	{
 		return myMSB;
@@ -32,22 +43,36 @@ public class Implicant {
 	{
 		return minterms;
 	}
+	public List<Long> getdontcares() {
+		return dontcares;
+	}
 	
+	public void mergeMinterms(List<Long> min1, List<Long> min2, List<Long> dont1, List<Long> dont2) {
+		minterms.addAll(min1);
+		minterms.addAll(min2);
+		dontcares.addAll(dont1);
+		dontcares.addAll(dont2);
+	}
 	public Implicant(long newMSB, long newLSB, int numVars)
 	{
 		myMSB = newMSB;
 		myLSB = newLSB;
 		myNumVars = numVars;
 		minterms = new ArrayList<Long>();
+		dontcares = new ArrayList<Long>();
 	}
 	
-	public Implicant(long minterm, int numVars)
+	public Implicant(long minterm, int numVars, boolean dontcare)
 	{
 		myMSB = minterm ^ BooleanExpression.maxVal;
 		myLSB = BooleanExpression.maxVal & (minterm | (BooleanExpression.maxVal << numVars));
 		myNumVars = numVars;
 		minterms = new ArrayList<Long>();
-		minterms.add(minterm);
+		dontcares = new ArrayList<Long>();
+		if(dontcare) 
+			dontcares.add(minterm);
+		else
+			minterms.add(minterm);
 	}
 
 	public boolean equals(Implicant imp)
@@ -99,4 +124,6 @@ public class Implicant {
 		expr.append(")");
 		return expr.toString();
 	}
+
+
 }

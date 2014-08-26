@@ -17,6 +17,8 @@ public class BooleanExpression {
 	private List<Implicant> implicantList;
 	private List<Implicant> dontcareList;
 	private List<Long> mintermsNeededToCover;
+	private List<Long> dontcaresList;
+	private List<Implicant> finalList;
 	private static long tempMSB;
 	private static long tempLSB;
 	private static int bitCountMSB;
@@ -31,6 +33,8 @@ public class BooleanExpression {
 		dontcareList = new ArrayList<Implicant>();
 		myNumVars = numVars; 
 		mintermsNeededToCover = new ArrayList<Long>();
+		dontcaresList = new ArrayList<Long>();
+		finalList = new ArrayList<Implicant>();
 	}
 	
 	public BooleanExpression(ArrayList<Long> minterms, ArrayList<Long> dontcares, int numVars)
@@ -38,13 +42,14 @@ public class BooleanExpression {
 		initBooleanExpression(numVars);
 		for (Long minterm : minterms)
 		{
-			implicantList.add(new Implicant(minterm, numVars));
+			implicantList.add(new Implicant(minterm, numVars, false));
 			mintermsNeededToCover.add(minterm);
 		}
 
 		for (Long dontcare : dontcares)
 		{
-			dontcareList.add(new Implicant(dontcare, numVars));
+			dontcaresList.add(dontcare);
+			dontcareList.add(new Implicant(dontcare, numVars, true));
 		}
 	}
 	
@@ -55,35 +60,81 @@ public class BooleanExpression {
 	
 	public boolean differBySingleVariable(Implicant imp1,  Implicant imp2) {
 		tempMSB = imp1.getMSB() ^ imp2.getMSB();
-		tempLSB = imp1.getLSB() ^ imp2.getMSB();
+		tempLSB = imp1.getLSB() ^ imp2.getLSB();
 		bitCountMSB = Long.bitCount(tempMSB);
 		bitCountLSB = Long.bitCount(tempLSB);
+//		System.out.println("tempMSB = " + tempMSB + " tempLSB = " + tempLSB + " bitCount = " + bitCountMSB + " ");
 		return (bitCountMSB == 1 && bitCountLSB == 1 && tempMSB == tempLSB);	
 	}
-	
+	public Implicant merge(Implicant imp1, Implicant imp2) {
+		tempMSB = imp1.getMSB() ^ imp2.getMSB();
+		tempLSB = imp1.getLSB() ^ imp2.getLSB();
+		tempMSB = imp1.getMSB() | tempMSB;
+		tempLSB = imp2.getLSB() | tempLSB;
+		Implicant newImp = new Implicant(tempMSB, tempLSB, myNumVars);
+		newImp.mergeMinterms(imp1.getMinterms(), imp2.getMinterms(), imp1.getdontcares(), imp2.getdontcares());
+		return newImp;
+	}
+	public boolean containsImplicant(ArrayList<Implicant> impList, Implicant imp) {
+		for (int i = 0; i < impList.size(); i++) {
+			if (imp.equals(impList.get(i))) 
+				return true;
+		}
+		return false;
+	}
 	public void doTabulationMethod()
 	{
 		ArrayList<ArrayList<ArrayList<Implicant>>> tabulationList = new ArrayList<ArrayList<ArrayList<Implicant>>>(myNumVars);
-		ArrayList<ArrayList<Implicant>> tempImplicantList = new ArrayList<ArrayList<Implicant>>(myNumVars);
-		boolean completed = true;
-		boolean prime = false;
-		int difference = Long.SIZE - myNumVars;
-		int bitCount;
-		for (int i = 0; i < implicantList.size(); i++) {
-			bitCount = Long.bitCount(implicantList.get(i).getMSB());
-			bitCount = bitCount - difference;
-			tempImplicantList.get(bitCount).add(implicantList.get(i));
-		}
-		while(true) {
-			for (int i = 0; i < tabulationList.size(); i++ ) {
-				completed = true;
-				for (int j = 0; j < tabulationList.get(i).size();i++) {
-					System.out.println("Size is " + tabulationList.get(i).size() + "for " + j + "0s");
-				}
+		for (int i = 0; i < myNumVars; i++) {
+			tabulationList.add(new ArrayList<ArrayList<Implicant>>());
+			for (int j = 0; j < myNumVars; j++) {
+				tabulationList.get(i).add(new ArrayList<Implicant>());
 			}
 		}
-		
+		boolean completed = true;
+		Implicant prev;
+		Implicant next;
+		int bitCount;
+		for (int i = 0; i < dontcaresList.size(); i++) {
+			bitCount = Long.bitCount(dontcaresList.get(i));
+			tabulationList.get(0).get(bitCount).add(dontcareList.get(i));
+		}
+		for (int i = 0; i < mintermsNeededToCover.size(); i++) {
+			bitCount = Long.bitCount(mintermsNeededToCover.get(i));
+			tabulationList.get(0).get(bitCount).add(implicantList.get(i));
+		}
+		Implicant temp;
+		for (int i = 0; i < tabulationList.size() - 1; i++ ) {
+			System.out.println("Number of squares = " + i);
+			completed = true;
+			for (int j = 0; j < tabulationList.get(i).size() - 1;j++) {
+					System.out.print(j + " ones : ");
+				for (int k = 0; k < tabulationList.get(i).get(j).size(); k++) {
+					tabulationList.get(i).get(j).get(k).printList();
+					prev = tabulationList.get(i).get(j).get(k);
+					for (int l = 0; l < tabulationList.get(i).get(j+1).size(); l++) {
+						next = tabulationList.get(i).get(j+1).get(l);
+//						System.out.print("Comparing " + prev.getLSB() + "with " + next.getLSB() + " ");
+						if (differBySingleVariable(prev, next)) {
+							completed = false;
+//							System.out.println("match");
+							temp = merge(prev,next);
+							implicantList.remove(prev);
+							implicantList.remove(next);
+							if (!containsImplicant(tabulationList.get(i+1).get(j),temp)) {
+							tabulationList.get(i+1).get(j).add(temp);
+							implicantList.add(temp);
+							}
+						}
+					}
+				}
+				System.out.println("");
+			}
+			if (completed)
+				break;
+		}
 	}
+
 	
 	public void doQuineMcCluskey()
 	{
