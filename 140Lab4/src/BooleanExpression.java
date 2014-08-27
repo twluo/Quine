@@ -59,22 +59,28 @@ public class BooleanExpression {
 	}
 	
 	public boolean differBySingleVariable(Implicant imp1,  Implicant imp2) {
-		tempMSB = imp1.getMSB() ^ imp2.getMSB();
-		tempLSB = imp1.getLSB() ^ imp2.getLSB();
-		bitCountMSB = Long.bitCount(tempMSB);
-		bitCountLSB = Long.bitCount(tempLSB);
+		tempMSB = imp1.getMSB() ^ imp2.getMSB(); // XOR together MSB to get 1 at a certain place
+		tempLSB = imp1.getLSB() ^ imp2.getLSB(); // XOR together LSB to get 1 at a certain place
+		bitCountMSB = Long.bitCount(tempMSB); // Get number of 1's in MSB
+		bitCountLSB = Long.bitCount(tempLSB); // Get number of 1's in LSB
 //		System.out.println("tempMSB = " + tempMSB + " tempLSB = " + tempLSB + " bitCount = " + bitCountMSB + " ");
-		return (bitCountMSB == 1 && bitCountLSB == 1 && tempMSB == tempLSB);	
+		return (bitCountMSB == 1 && bitCountLSB == 1 && tempMSB == tempLSB); //Compare and return that MSB and LSB only contain one 1	
 	}
 	public Implicant merge(Implicant imp1, Implicant imp2) {
-		tempMSB = imp1.getMSB() ^ imp2.getMSB();
-		tempLSB = imp1.getLSB() ^ imp2.getLSB();
-		tempMSB = imp1.getMSB() | tempMSB;
-		tempLSB = imp2.getLSB() | tempLSB;
-		Implicant newImp = new Implicant(tempMSB, tempLSB, myNumVars);
-		newImp.mergeMinterms(imp1.getMinterms(), imp2.getMinterms(), imp1.getdontcares(), imp2.getdontcares());
+		tempMSB = imp1.getMSB() ^ imp2.getMSB(); // XOR together MSB
+		tempLSB = imp1.getLSB() ^ imp2.getLSB(); // XOR together LSB
+		tempMSB = imp1.getMSB() | tempMSB; //Or together tempMSB and MSB of imp1 to keep everything same except for differing position
+		tempLSB = imp2.getLSB() | tempLSB; //Or together tempLSB and LSB of imp2 to keep everything same except for differing position
+		Implicant newImp = new Implicant(tempMSB, tempLSB, myNumVars); //create new Implicant list
+		newImp.mergeMinterms(imp1.getMinterms(), imp2.getMinterms(), imp1.getdontcares(), imp2.getdontcares()); //create new implicant for next group using minterms and Don't cares
 		return newImp;
 	}
+	
+	/**
+	 * Used to check if list contains implicant
+	 * @param impList: List to look through
+	 * @param imp: Variable to check if it's in list
+	 */
 	public boolean containsImplicant(ArrayList<Implicant> impList, Implicant imp) {
 		for (int i = 0; i < impList.size(); i++) {
 			if (imp.equals(impList.get(i))) 
@@ -82,6 +88,10 @@ public class BooleanExpression {
 		}
 		return false;
 	}
+	
+	/**
+	 * Method to replace implicants with prime implicants using minterms and don't cares
+	 */
 	public void doTabulationMethod()
 	{
 		ArrayList<ArrayList<ArrayList<Implicant>>> tabulationList = new ArrayList<ArrayList<ArrayList<Implicant>>>(myNumVars);
