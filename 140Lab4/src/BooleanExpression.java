@@ -84,10 +84,10 @@ public class BooleanExpression {
 	}
 	public void doTabulationMethod()
 	{
-		ArrayList<ArrayList<ArrayList<Implicant>>> tabulationList = new ArrayList<ArrayList<ArrayList<Implicant>>>(myNumVars);
-		for (int i = 0; i < myNumVars; i++) {
+		ArrayList<ArrayList<ArrayList<Implicant>>> tabulationList = new ArrayList<ArrayList<ArrayList<Implicant>>>(myNumVars + 1);
+		for (int i = 0; i < myNumVars + 1; i++) {
 			tabulationList.add(new ArrayList<ArrayList<Implicant>>());
-			for (int j = 0; j < myNumVars; j++) {
+			for (int j = 0; j < myNumVars + 1; j++) {
 				tabulationList.get(i).add(new ArrayList<Implicant>());
 			}
 		}
@@ -95,10 +95,10 @@ public class BooleanExpression {
 		Implicant prev;
 		Implicant next;
 		int bitCount;
-		for (int i = 0; i < dontcaresList.size(); i++) {
-			bitCount = Long.bitCount(dontcaresList.get(i));
-			tabulationList.get(0).get(bitCount).add(dontcareList.get(i));
-		}
+//		for (int i = 0; i < dontcaresList.size(); i++) {
+//			bitCount = Long.bitCount(dontcaresList.get(i));
+//			tabulationList.get(0).get(bitCount).add(dontcareList.get(i));
+//		}
 		for (int i = 0; i < mintermsNeededToCover.size(); i++) {
 			bitCount = Long.bitCount(mintermsNeededToCover.get(i));
 			tabulationList.get(0).get(bitCount).add(implicantList.get(i));
@@ -109,8 +109,9 @@ public class BooleanExpression {
 			completed = true;
 			for (int j = 0; j < tabulationList.get(i).size() - 1;j++) {
 					System.out.print(j + " ones : ");
+					System.out.print("There are " + tabulationList.get(i).get(j).size());
 				for (int k = 0; k < tabulationList.get(i).get(j).size(); k++) {
-					tabulationList.get(i).get(j).get(k).printList();
+//					tabulationList.get(i).get(j).get(k).printList();
 					prev = tabulationList.get(i).get(j).get(k);
 					for (int l = 0; l < tabulationList.get(i).get(j+1).size(); l++) {
 						next = tabulationList.get(i).get(j+1).get(l);
@@ -122,8 +123,8 @@ public class BooleanExpression {
 							implicantList.remove(prev);
 							implicantList.remove(next);
 							if (!containsImplicant(tabulationList.get(i+1).get(j),temp)) {
-							tabulationList.get(i+1).get(j).add(temp);
-							implicantList.add(temp);
+								tabulationList.get(i+1).get(j).add(temp);
+								implicantList.add(temp);
 							}
 						}
 					}

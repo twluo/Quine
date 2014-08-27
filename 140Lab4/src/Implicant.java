@@ -17,6 +17,9 @@ public class Implicant {
 		for(int i=0; i<minterms.size(); i++) {
 			System.out.print(Long.toString(minterms.get(i)) + ", ");
 		}
+		for (int i = 0; i < dontcares.size(); i++) {
+			System.out.print(Long.toString(dontcares.get(i)) + ", ");
+		}
 		System.out.println("");
 	}
 	
