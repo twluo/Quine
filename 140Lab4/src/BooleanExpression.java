@@ -310,7 +310,8 @@ public class BooleanExpression {
 		/*
 		 * Adding Stuff
 		 */
-		nessesaryImplicant = primeImplicant;
+		for (int i = 0; i < primeImplicant.size(); i++)
+			nessesaryImplicant.add(primeImplicant.get(i));
 		System.out.println("ASDASD" + nessesaryImplicant.size());
 		for (int i = 0; i < row.size(); i++) {
 			if (!row.get(i).isZero()) {
@@ -337,7 +338,7 @@ public class BooleanExpression {
 		}
 	}
 	public ArrayList<BitVector> doAbsorption(ArrayList<BitVector> answers) {
-		System.out.println("Step 3");
+//		System.out.println("Step 3");
 		ArrayList<BitVector> absorved = new ArrayList<BitVector>();
 		for (int i = 0; i < answers.size() - 1; i++) {
 			for (int j = i + 1; j < answers.size(); j++) {
@@ -362,7 +363,7 @@ public class BooleanExpression {
 		return answers;
 	}
 	public ArrayList<BitVector> multiply(ArrayList<BitVector> multiplicand, ArrayList<BitVector> multiplier) {
-		System.out.println("Step 2");
+//		System.out.println("Step 2");
 		ArrayList<BitVector> temp = new ArrayList<BitVector>();
 		for (int i = 0; i < multiplicand.size(); i++) {
 			for (int j = 0; j < multiplier.size(); j++) {
@@ -390,35 +391,38 @@ public class BooleanExpression {
 				answers.add(petrickList.get(0).get(j).union(petrickList.get(1).get(k)));
 			}
 		}
-		for (int l = 0; l < answers.size(); l++)
-			System.out.println(answers.get(l).toString());
-		System.out.println("ABSORPTION");
+//		for (int l = 0; l < answers.size(); l++)
+//			System.out.println(answers.get(l).toString());
+//		System.out.println("ABSORPTION");
 		answers = doAbsorption(answers);
-		for (int l = 0; l < answers.size(); l++)
-			System.out.println(answers.get(l).toString());
-		System.out.println("Done");
+//		for (int l = 0; l < answers.size(); l++)
+//			System.out.println(answers.get(l).toString());
+//		System.out.println("Done");
 		
 		
 		for (int i = 2; i < petrickList.size(); i++) {
-			System.out.println("step 1");
+//			System.out.println("step 1");
 			answers = multiply(answers, petrickList.get(i));
 			answers = doAbsorption(answers);
-			for (int l = 0; l < answers.size(); l++)
-				System.out.println(answers.get(l).toString());
+//			for (int l = 0; l < answers.size(); l++)
+//				System.out.println(answers.get(l).toString());
 		}
 		System.out.println(answers.size());
 		for (int i = 0; i < answers.size(); i++) {
 			System.out.println(answers.get(i).toString());
 		}
-		int min = 0;
+		int min = 0; 
+		int index = 0;
 		for (int i = 0; i < answers.size(); i++) {
 			if (i == 0)
 				min = answers.get(i).getCardinality();
-			if (min > answers.get(i).getCardinality())
+			if (min > answers.get(i).getCardinality()) {
 				min = answers.get(i).getCardinality();
+				index = i;
+			}
 		}
-		for (int i = 0; i < answers.get(min).getSize(); i++) {
-			if (answers.get(min).exists(i))
+		for (int i = 0; i < answers.get(index).getSize(); i++) {
+			if (answers.get(index).exists(i))
 				nessesaryImplicant.add(tempImplicantList.get(i));
 		}
 		implicantList = nessesaryImplicant;

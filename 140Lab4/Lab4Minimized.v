@@ -4,5 +4,5 @@ input b,
 input c,
 output out
 );
-	assign out = ((~b)&(~c))|((~a)&(~c))|(a&(~b))|((~a)&b)|(a&c)|(b&c)|((~a)&(~c))|(a&(~b))|((~a)&b)|(a&c);
+	assign out = ((~b)&(~c))|((~a)&b)|(a&c);
 endmodule
