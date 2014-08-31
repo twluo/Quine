@@ -113,10 +113,10 @@ public class BooleanExpression {
 		int bitCount;
 		
 		//populate lists
-		for (int i = 0; i < dontcaresList.size(); i++) {
-			bitCount = Long.bitCount(dontcaresList.get(i));
-			tabulationList.get(0).get(bitCount).add(dontcareList.get(i));
-		}
+//		for (int i = 0; i < dontcaresList.size(); i++) {
+//			bitCount = Long.bitCount(dontcaresList.get(i));
+//			tabulationList.get(0).get(bitCount).add(dontcareList.get(i));
+//		}
 		for (int i = 0; i < mintermsNeededToCover.size(); i++) {
 			bitCount = Long.bitCount(mintermsNeededToCover.get(i));
 			tabulationList.get(0).get(bitCount).add(implicantList.get(i));
