@@ -14,9 +14,11 @@ public class Implicant {
 	private List<Long> dontcares;
 
 	public void printList() {
+		System.out.print("Minterms: ");
 		for(int i=0; i<minterms.size(); i++) {
 			System.out.print(Long.toString(minterms.get(i)) + ", ");
 		}
+		System.out.print("Dontcare: ");
 		for (int i = 0; i < dontcares.size(); i++) {
 			System.out.print(Long.toString(dontcares.get(i)) + ", ");
 		}

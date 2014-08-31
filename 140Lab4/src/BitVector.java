@@ -81,7 +81,19 @@ public class BitVector
 		bitVectorChunk = bitVectorChunk & (~mask);
 		bitVectorList.set(adjustedSize, bitVectorChunk);
 	}
-	
+	public void unsetAll() {
+		for (int i = 0; i < mySize; i++) {
+			unset(i);
+		}
+	}
+	public int findNeededImplicant() {
+		for (int i = 0; i < mySize; i++) {
+			if (exists(i)) {
+				return i;
+			}
+		}
+		return 0;
+	}
 	public int getSize()
 	{
 		return mySize;

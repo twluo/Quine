@@ -18,7 +18,6 @@ public class BooleanExpression {
 	private List<Implicant> dontcareList;
 	private List<Long> mintermsNeededToCover;
 	private List<Long> dontcaresList;
-	private List<Implicant> finalList;
 	private static long tempMSB;
 	private static long tempLSB;
 	private static int bitCountMSB;
@@ -26,6 +25,10 @@ public class BooleanExpression {
 	private int myNumVars;
 	public static final long maxVal = -1;
 	public static final String alphabet = "abcdefghijklmnopqrstuvwxyz";
+	private ArrayList<BitVector> row;
+	private ArrayList<BitVector> col;
+	private ArrayList<Implicant> primeImplicant;
+	private ArrayList<Implicant> petrickImplicant;
 	
 	private void initBooleanExpression(int numVars)
 	{
@@ -34,7 +37,7 @@ public class BooleanExpression {
 		myNumVars = numVars; 
 		mintermsNeededToCover = new ArrayList<Long>();
 		dontcaresList = new ArrayList<Long>();
-		finalList = new ArrayList<Implicant>();
+		primeImplicant = new ArrayList<Implicant>();
 	}
 	
 	public BooleanExpression(ArrayList<Long> minterms, ArrayList<Long> dontcares, int numVars)
@@ -67,10 +70,8 @@ public class BooleanExpression {
 		return (bitCountMSB == 1 && bitCountLSB == 1 && tempMSB == tempLSB); //Compare and return that MSB and LSB only contain one 1	
 	}
 	public Implicant merge(Implicant imp1, Implicant imp2) {
-		tempMSB = imp1.getMSB() ^ imp2.getMSB(); // XOR together MSB
-		tempLSB = imp1.getLSB() ^ imp2.getLSB(); // XOR together LSB
-		tempMSB = imp1.getMSB() | tempMSB; //Or together tempMSB and MSB of imp1 to keep everything same except for differing position
-		tempLSB = imp2.getLSB() | tempLSB; //Or together tempLSB and LSB of imp2 to keep everything same except for differing position
+		tempMSB = imp1.getMSB() | imp2.getMSB(); // XOR together MSB
+		tempLSB = imp1.getLSB() | imp2.getLSB(); // XOR together LSB
 		Implicant newImp = new Implicant(tempMSB, tempLSB, myNumVars); //create new Implicant list
 		newImp.mergeMinterms(imp1.getMinterms(), imp2.getMinterms(), imp1.getdontcares(), imp2.getdontcares()); //create new implicant for next group using minterms and Don't cares
 		return newImp;
@@ -115,11 +116,11 @@ public class BooleanExpression {
 		}
 		Implicant temp;
 		for (int i = 0; i < tabulationList.size() - 1; i++ ) {
-			System.out.println("Number of squares = " + i);
+//			System.out.println("Number of cubes = " + i);
 			completed = true;
 			for (int j = 0; j < tabulationList.get(i).size() - 1;j++) {
-					System.out.print(j + " ones : ");
-					System.out.print("There are " + tabulationList.get(i).get(j).size());
+//					System.out.print(j + " ones : ");
+//					System.out.print("There are " + tabulationList.get(i).get(j).size());
 				for (int k = 0; k < tabulationList.get(i).get(j).size(); k++) {
 //					tabulationList.get(i).get(j).get(k).printList();
 					prev = tabulationList.get(i).get(j).get(k);
@@ -130,16 +131,19 @@ public class BooleanExpression {
 							completed = false;
 //							System.out.println("match");
 							temp = merge(prev,next);
+//							temp.printList();
 							implicantList.remove(prev);
 							implicantList.remove(next);
 							if (!containsImplicant(tabulationList.get(i+1).get(j),temp)) {
+								if (!temp.getMinterms().isEmpty()) {
+									implicantList.add(temp);
+								}
 								tabulationList.get(i+1).get(j).add(temp);
-								implicantList.add(temp);
 							}
 						}
 					}
 				}
-				System.out.println("");
+//				System.out.println("");
 			}
 			if (completed)
 				break;
@@ -149,7 +153,160 @@ public class BooleanExpression {
 	
 	public void doQuineMcCluskey()
 	{
-		//TODO: Your code goes here
+		row = new ArrayList<BitVector>(implicantList.size());
+		col = new ArrayList<BitVector>(mintermsNeededToCover.size());
+		Implicant impTemp;
+		BitVector bitVectorTemp;
+		List<Long> minterms;
+		for (int i = 0; i < implicantList.size(); i++) {
+//			implicantList.get(i).printList();
+			row.add(new BitVector(mintermsNeededToCover.size()));
+		}
+		for (int i = 0; i < mintermsNeededToCover.size(); i++) {
+			col.add(new BitVector(implicantList.size()));
+		}
+		for (int i = 0; i < implicantList.size(); i++) {
+			impTemp = implicantList.get(i);
+			minterms = impTemp.getMinterms();
+			for (int j = 0; j < minterms.size(); j++) {
+				row.get(i).set(mintermsNeededToCover.indexOf(minterms.get(j)));
+				col.get(mintermsNeededToCover.indexOf(minterms.get(j))).set(i);
+			}
+		}
+//		System.out.println("Cols");
+//		for (int i = 0; i < implicantList.size(); i++) {
+//			System.out.println(row.get(i).toString() + " " + row.get(i).getCardinality());
+//		}
+//		System.out.println("Rows");
+//		for (int i = 0; i < mintermsNeededToCover.size(); i++) {
+//			System.out.println(col.get(i).toString() + " " + col.get(i).getCardinality());
+//		}
+		int index;
+		int count = 0;
+		int tempCount = 0;
+		System.out.println("START");
+		while (true) {
+			tempCount++;
+			count++;
+			/*
+			 * STEP 1!!!!!!!
+			 */
+//			System.out.println("step 1 = " + count);
+			for (int i = 0; i < col.size(); i++) {
+//				System.out.println("index = " + i + " hex = " + col.get(i).toString() + " altIndex = " + col.get(i).findNeededImplicant());
+				if (col.get(i).getCardinality() == 1) {
+//					System.out.print(col.get(i).toString());
+					count = 0;
+					index = col.get(i).findNeededImplicant();
+					col.get(i).unset(index);
+//					System.out.print(mintermsNeededToCover.size());
+//					System.out.println("index = " + index + "," + i);
+					if (!containsImplicant(primeImplicant, implicantList.get(index)))
+						primeImplicant.add(implicantList.get(index));
+					for (int j = 0; j < col.size(); j++) {
+						if(row.get(index).exists(j)) {
+							row.get(index).unset(j);
+							for (int k = 0; k < row.size(); k++) {
+								if (col.get(j).exists(k)) {
+									col.get(j).unset(k);
+									row.get(k).unset(j);
+								}
+							}
+							
+						}
+					}
+				}
+			}
+			if (count == 3)
+				break;
+			count++;
+			/*
+			 * STEP 2!!!!!!
+			 */
+//			System.out.println("step 2 = " + count);
+			for (int i = 0; i < row.size() - 1; i++) {
+				bitVectorTemp = row.get(i);
+				for (int j = i + 1; j < row.size(); j++) {
+					if (!row.get(j).isZero() && !row.get(i).isZero()) {
+						if (bitVectorTemp.union(row.get(j)).equals(bitVectorTemp)) {
+							count = 0;
+							for (int k = 0; k < col.size(); k++) {
+								if (row.get(j).exists(k)) {
+//									System.out.println("index = " +i + "," + j + "," + k );
+									row.get(j).unset(k);
+									col.get(k).unset(j);
+								}
+							}
+						}
+						else if (bitVectorTemp.union(row.get(j)).equals(row.get(j))) {
+//							System.out.println("DOMINATION");
+							count = 0;
+							for (int k = 0; k < col.size(); k++) {
+								if (row.get(i).exists(k)) {
+									row.get(i).unset(k);
+									col.get(k).unset(i);
+								}
+							}
+							
+						}
+					}
+
+				}
+			}
+			if (count == 3)
+				break;
+			count++;
+			/*
+			 * STEP 3!!!!!!!!!
+			 */
+//			System.out.println("step 3 = " + count);
+			for (int i = 0; i < col.size() - 1; i++) {
+				bitVectorTemp = col.get(i);
+				for (int j = i + 1; j < col.size(); j++) {
+					if (!col.get(j).isZero() && !col.get(i).isZero()) {
+						if (bitVectorTemp.union(col.get(j)).equals(col.get(j))) {
+//							System.out.println("DOMINATION");
+							count = 0;
+							for (int k = 0; k < row.size(); k++) {
+								if (col.get(j).exists(k)) {
+									col.get(j).unset(k);
+									row.get(k).unset(j);
+								}
+							}
+						}
+						else if (bitVectorTemp.union(col.get(j)).equals(bitVectorTemp)) {
+//							System.out.println("DOMINATION");
+							count = 0;
+							for (int k = 0; k < row.size(); k++) {
+								if (col.get(i).exists(k)) {
+									col.get(i).unset(k);
+									row.get(k).unset(i);
+								}
+							}
+						}
+					}
+
+				}
+			}
+			if (count == 3)
+				break;
+			}
+//		for (int i = 0; i < primeImplicant.size(); i++) {
+//			primeImplicant.get(i).printList();
+//		}
+		/*
+		 * Adding Stuff
+		 */
+		for (int i = 0; i < row.size(); i++) {
+			if (!row.get(i).isZero()) {
+				primeImplicant.add(implicantList.get(i));
+			}
+		}
+		implicantList = primeImplicant;
+//		for (int i = 0; i < implicantList.size(); i++) {
+//			implicantList.get(i).printList();
+//		}
+		System.out.println(tempCount);
 	}
 	
 	public void doPetricksMethod()
