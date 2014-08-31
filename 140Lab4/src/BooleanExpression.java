@@ -113,7 +113,10 @@ public class BooleanExpression {
 		int bitCount;
 		
 		//populate lists
-
+		for (int i = 0; i < dontcaresList.size(); i++) {
+			bitCount = Long.bitCount(dontcaresList.get(i));
+			tabulationList.get(0).get(bitCount).add(dontcareList.get(i));
+		}
 		for (int i = 0; i < mintermsNeededToCover.size(); i++) {
 			bitCount = Long.bitCount(mintermsNeededToCover.get(i));
 			tabulationList.get(0).get(bitCount).add(implicantList.get(i));
@@ -183,10 +186,7 @@ public class BooleanExpression {
 
 		int index;
 		int count = 0;
-		int tempCount = 0;
-		System.out.println("START");
 		while (true) {
-			tempCount++;
 			count++;
 			/*
 			 * STEP 1!!!!!!!
@@ -289,15 +289,12 @@ public class BooleanExpression {
 		 */
 		for (int i = 0; i < primeImplicant.size(); i++)
 			nessesaryImplicant.add(primeImplicant.get(i));
-		System.out.println("ASDASD" + nessesaryImplicant.size());
 		for (int i = 0; i < row.size(); i++) {
 			if (!row.get(i).isZero()) {
 				primeImplicant.add(implicantList.get(i));
 			}
 		}
 		implicantList = primeImplicant;
-
-		System.out.println(tempCount); 
 		for(int i = 0; i < col.size(); i++) {
 			if (!col.get(i).isZero()) {
 				ArrayList<BitVector> tempList = new ArrayList<BitVector>();
@@ -353,18 +350,10 @@ public class BooleanExpression {
 	 */
 	public void doPetricksMethod()
 	{
-		System.out.println("ASD " + petrickList.size());
 		if (petrickList.isEmpty())
 			return; //end if list is empty
 		ArrayList<BitVector> answers = new ArrayList<BitVector>(); //array to hold answers
-
-		//loop through Petricks list and output current implicants
-		for (int i = 0; i < petrickList.size(); i++) {
-			System.out.println("List = " + i);
-			for (int j = 0; j < petrickList.get(i).size(); j++) {
-				System.out.println(petrickList.get(i).get(j).toString());
-			}
-		}
+		
 		//Add answers from Petricks list to answers list that are Xor'ed 
 		for (int j = 0; j < petrickList.get(0).size(); j++) {
 			for (int k = 0; k < petrickList.get(1).size(); k++) {
@@ -377,10 +366,6 @@ public class BooleanExpression {
 			answers = multiply(answers, petrickList.get(i));
 			answers = doAbsorption(answers);
 
-		}
-		System.out.println(answers.size());
-		for (int i = 0; i < answers.size(); i++) {
-			System.out.println(answers.get(i).toString());
 		}
 		int min = 0; 
 		int index = 0;
@@ -398,10 +383,6 @@ public class BooleanExpression {
 				nessesaryImplicant.add(tempImplicantList.get(i));
 		}
 		implicantList = nessesaryImplicant;
-		System.out.println("ASD");
-		for (int i = 0; i < implicantList.size(); i++) {
-			implicantList.get(i).printList();
-		}
 	}
 	
 	/*
