@@ -2,8 +2,7 @@ module Lab4Minimized(
 input a,
 input b,
 input c,
-input d,
 output out
 );
-	assign out = ((~a)&b&(~c))|((~a)&(~b)&c)|(a&c&d)|((~a)&(~c)&d);
+	assign out = ((~b)&(~c))|((~a)&(~c))|(a&(~b))|((~a)&b)|(a&c)|(b&c)|((~a)&(~c))|(a&(~b))|((~a)&b)|(a&c);
 endmodule

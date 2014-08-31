@@ -2,8 +2,7 @@ module Lab4Minterms(
 input a,
 input b,
 input c,
-input d,
 output out
 );
-	assign out = ((~a)&b&(~c)&(~d))|((~a)&(~b)&c&(~d))|((~a)&(~b)&(~c)&d)|((~a)&b&(~c)&d)|((~a)&(~b)&c&d)|(a&(~b)&c&d)|(a&b&c&d);
+	assign out = ((~a)&(~b)&(~c))|(a&(~b)&(~c))|((~a)&b&(~c))|(a&(~b)&c)|((~a)&b&c)|(a&b&c);
 endmodule

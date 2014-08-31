@@ -28,7 +28,9 @@ public class BooleanExpression {
 	private ArrayList<BitVector> row;
 	private ArrayList<BitVector> col;
 	private ArrayList<Implicant> primeImplicant;
-	private ArrayList<Implicant> petrickImplicant;
+	private ArrayList<ArrayList<BitVector>> petrickList;
+	private ArrayList<Implicant> nessesaryImplicant;
+	private List<Implicant> tempImplicantList;
 	
 	private void initBooleanExpression(int numVars)
 	{
@@ -38,6 +40,9 @@ public class BooleanExpression {
 		mintermsNeededToCover = new ArrayList<Long>();
 		dontcaresList = new ArrayList<Long>();
 		primeImplicant = new ArrayList<Implicant>();
+		petrickList = new ArrayList<ArrayList<BitVector>>();
+		nessesaryImplicant = new ArrayList<Implicant>();
+		tempImplicantList = new ArrayList<Implicant>();
 	}
 	
 	public BooleanExpression(ArrayList<Long> minterms, ArrayList<Long> dontcares, int numVars)
@@ -109,10 +114,10 @@ public class BooleanExpression {
 		int bitCount;
 		
 		//populate lists
-		for (int i = 0; i < dontcaresList.size(); i++) {
-			bitCount = Long.bitCount(dontcaresList.get(i));
-			tabulationList.get(0).get(bitCount).add(dontcareList.get(i));
-		}
+//		for (int i = 0; i < dontcaresList.size(); i++) {
+//			bitCount = Long.bitCount(dontcaresList.get(i));
+//			tabulationList.get(0).get(bitCount).add(dontcareList.get(i));
+//		}
 		for (int i = 0; i < mintermsNeededToCover.size(); i++) {
 			bitCount = Long.bitCount(mintermsNeededToCover.get(i));
 			tabulationList.get(0).get(bitCount).add(implicantList.get(i));
@@ -124,8 +129,8 @@ public class BooleanExpression {
 			completed = true;
 			//Select subcube based on how many ones there are
 			for (int j = 0; j < tabulationList.get(i).size() - 1;j++) {
-					System.out.print(j + " ones : ");
-					System.out.print("There are " + tabulationList.get(i).get(j).size());
+//					System.out.print(j + " ones : ");
+//					System.out.print("There are " + tabulationList.get(i).get(j).size());
 				//Select Subcube within group to compare	
 				for (int k = 0; k < tabulationList.get(i).get(j).size(); k++) {
 //					tabulationList.get(i).get(j).get(k).printList();
@@ -160,6 +165,7 @@ public class BooleanExpression {
 	
 	public void doQuineMcCluskey()
 	{
+		tempImplicantList = implicantList;
 		row = new ArrayList<BitVector>(implicantList.size());
 		col = new ArrayList<BitVector>(mintermsNeededToCover.size());
 		Implicant impTemp;
@@ -304,6 +310,8 @@ public class BooleanExpression {
 		/*
 		 * Adding Stuff
 		 */
+		nessesaryImplicant = primeImplicant;
+		System.out.println("ASDASD" + nessesaryImplicant.size());
 		for (int i = 0; i < row.size(); i++) {
 			if (!row.get(i).isZero()) {
 				primeImplicant.add(implicantList.get(i));
@@ -313,12 +321,111 @@ public class BooleanExpression {
 //		for (int i = 0; i < implicantList.size(); i++) {
 //			implicantList.get(i).printList();
 //		}
-		System.out.println(tempCount);
+		System.out.println(tempCount); 
+		for(int i = 0; i < col.size(); i++) {
+			if (!col.get(i).isZero()) {
+				ArrayList<BitVector> tempList = new ArrayList<BitVector>();
+				for (int j = 0; j < col.size(); j++) {
+					if (col.get(i).exists(j)) {
+						BitVector tempVector = new BitVector(row.size());
+						tempVector.set(j);
+						tempList.add(tempVector);
+					}
+				}
+				petrickList.add(tempList);
+			}
+		}
 	}
-	
+	public ArrayList<BitVector> doAbsorption(ArrayList<BitVector> answers) {
+		System.out.println("Step 3");
+		ArrayList<BitVector> absorved = new ArrayList<BitVector>();
+		for (int i = 0; i < answers.size() - 1; i++) {
+			for (int j = i + 1; j < answers.size(); j++) {
+//				System.out.println("Comparing" + answers.get(i).toString() + " with " + answers.get(j).toString());
+//				System.out.println(i + " " + j);
+				if (answers.get(i).union(answers.get(j)).equals(answers.get(i))) {
+//					System.out.println(answers.get(j).toString() +  " removed " + answers.get(i).toString());
+					if (!absorved.contains(answers.get(i))) {
+						absorved.add(answers.get(i));
+					}
+				}
+				else if (answers.get(i).union(answers.get(j)).equals(answers.get(j))) {
+//					System.out.println(answers.get(i).toString() +  " removed 2" + answers.get(j).toString());
+					if (!absorved.contains(answers.get(j))) {
+						absorved.add(answers.get(j));
+					}
+				}
+			}
+		}
+		for (int i = 0; i < absorved.size(); i++) 
+			answers.remove(absorved.get(i));
+		return answers;
+	}
+	public ArrayList<BitVector> multiply(ArrayList<BitVector> multiplicand, ArrayList<BitVector> multiplier) {
+		System.out.println("Step 2");
+		ArrayList<BitVector> temp = new ArrayList<BitVector>();
+		for (int i = 0; i < multiplicand.size(); i++) {
+			for (int j = 0; j < multiplier.size(); j++) {
+				temp.add(multiplicand.get(i).union(multiplier.get(j)));
+			}
+		}
+		
+		return temp;
+	}
 	public void doPetricksMethod()
 	{
-		//TODO: Your code goes here
+		System.out.println("ASD " + petrickList.size());
+		if (petrickList.isEmpty())
+			return;
+		ArrayList<BitVector> answers = new ArrayList<BitVector>();
+
+		for (int i = 0; i < petrickList.size(); i++) {
+			System.out.println("List = " + i);
+			for (int j = 0; j < petrickList.get(i).size(); j++) {
+				System.out.println(petrickList.get(i).get(j).toString());
+			}
+		}
+		for (int j = 0; j < petrickList.get(0).size(); j++) {
+			for (int k = 0; k < petrickList.get(1).size(); k++) {
+				answers.add(petrickList.get(0).get(j).union(petrickList.get(1).get(k)));
+			}
+		}
+		for (int l = 0; l < answers.size(); l++)
+			System.out.println(answers.get(l).toString());
+		System.out.println("ABSORPTION");
+		answers = doAbsorption(answers);
+		for (int l = 0; l < answers.size(); l++)
+			System.out.println(answers.get(l).toString());
+		System.out.println("Done");
+		
+		
+		for (int i = 2; i < petrickList.size(); i++) {
+			System.out.println("step 1");
+			answers = multiply(answers, petrickList.get(i));
+			answers = doAbsorption(answers);
+			for (int l = 0; l < answers.size(); l++)
+				System.out.println(answers.get(l).toString());
+		}
+		System.out.println(answers.size());
+		for (int i = 0; i < answers.size(); i++) {
+			System.out.println(answers.get(i).toString());
+		}
+		int min = 0;
+		for (int i = 0; i < answers.size(); i++) {
+			if (i == 0)
+				min = answers.get(i).getCardinality();
+			if (min > answers.get(i).getCardinality())
+				min = answers.get(i).getCardinality();
+		}
+		for (int i = 0; i < answers.get(min).getSize(); i++) {
+			if (answers.get(min).exists(i))
+				nessesaryImplicant.add(tempImplicantList.get(i));
+		}
+		implicantList = nessesaryImplicant;
+System.out.println("ASD");
+		for (int i = 0; i < implicantList.size(); i++) {
+			implicantList.get(i).printList();
+		}
 	}
 	
 	/*

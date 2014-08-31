@@ -17,8 +17,10 @@ public class Main
 //
 //		long[] dontcaresArr = {7, 8, 27, 101, 703, 1334, 1842};
 		
-		long[] mintermsArr = {2, 4, 8, 10, 12, 13, 15};
+//		long[] mintermsArr = {2, 4, 8, 10, 12, 13, 15};
 		long[] dontcaresArr = { 0, 1};
+		long[] mintermsArr = {0,1,2,5,6,7};
+//		long[] dontcaresArr = { 9,25};
 
 		ArrayList<Long> al = new ArrayList<Long>();
 		
