@@ -95,7 +95,8 @@ public class BooleanExpression {
 	 */
 	public void doTabulationMethod()
 	{
-		ArrayList<ArrayList<ArrayList<Implicant>>> tabulationList = new ArrayList<ArrayList<ArrayList<Implicant>>>(myNumVars + 1);
+		ArrayList<ArrayList<ArrayList<Implicant>>> tabulationList = new ArrayList<ArrayList<ArrayList<Implicant>>>(myNumVars + 1); //create new Arraylist to store implicants
+		//Creating a list within a list within a list to represent group, subcubes and implicants within both, respectively
 		for (int i = 0; i < myNumVars + 1; i++) {
 			tabulationList.add(new ArrayList<ArrayList<Implicant>>());
 			for (int j = 0; j < myNumVars + 1; j++) {
@@ -106,24 +107,30 @@ public class BooleanExpression {
 		Implicant prev;
 		Implicant next;
 		int bitCount;
-//		for (int i = 0; i < dontcaresList.size(); i++) {
-//			bitCount = Long.bitCount(dontcaresList.get(i));
-//			tabulationList.get(0).get(bitCount).add(dontcareList.get(i));
-//		}
+		
+		//populate lists
+		for (int i = 0; i < dontcaresList.size(); i++) {
+			bitCount = Long.bitCount(dontcaresList.get(i));
+			tabulationList.get(0).get(bitCount).add(dontcareList.get(i));
+		}
 		for (int i = 0; i < mintermsNeededToCover.size(); i++) {
 			bitCount = Long.bitCount(mintermsNeededToCover.get(i));
 			tabulationList.get(0).get(bitCount).add(implicantList.get(i));
 		}
+		
+		//Counting and displaying number of cubes
 		Implicant temp;
 		for (int i = 0; i < tabulationList.size() - 1; i++ ) {
-//			System.out.println("Number of cubes = " + i);
 			completed = true;
+			//Select subcube based on how many ones there are
 			for (int j = 0; j < tabulationList.get(i).size() - 1;j++) {
-//					System.out.print(j + " ones : ");
-//					System.out.print("There are " + tabulationList.get(i).get(j).size());
+					System.out.print(j + " ones : ");
+					System.out.print("There are " + tabulationList.get(i).get(j).size());
+				//Select Subcube within group to compare	
 				for (int k = 0; k < tabulationList.get(i).get(j).size(); k++) {
 //					tabulationList.get(i).get(j).get(k).printList();
 					prev = tabulationList.get(i).get(j).get(k);
+					//Compare subcube with subcubes of adjacent group
 					for (int l = 0; l < tabulationList.get(i).get(j+1).size(); l++) {
 						next = tabulationList.get(i).get(j+1).get(l);
 //						System.out.print("Comparing " + prev.getLSB() + "with " + next.getLSB() + " ");
